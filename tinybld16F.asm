@@ -1,87 +1,71 @@
-	radix DEC
-	LIST      P=16F876A, F=INHX8M	; change also: Configure->SelectDevice from Mplab 
-xtal EQU 20000000		; you may also want to change: _HS_OSC _XT_OSC
-baud EQU 115200			; standard TinyBld baud rates: 115200 or 19200
-	; The above 3 lines can be changed and buid a bootloader for the desired frequency (and PIC type)
+radix		DEC					;Trabaja en sistema de notacion decimal por defecto
+LIST      	P=16F876A, F=INHX8M			; change also: Configure->SelectDevice from Mplab 
+xtal 		EQU 20000000				; you may also want to change: _HS_OSC _XT_OSC
+baud 		EQU 115200				; standard TinyBld baud rates: 115200 or 19200
 
-	;********************************************************************
-	;	Tiny Bootloader		16FxxxA series		Size=100words
-	;	claudiu.chiculita@ugal.ro
-	;	http://www.etc.ugal.ro/cchiculita/software/picbootloader.htm
-	;********************************************************************
+; Archivos con características de los PIC
+#include "../icdpictypes.inc"		
+#include "../spbrgselect.inc"
+#include "../bankswitch.inc"
+#define first_address max_flash-100 ; 100 word in size
 
-	#include "../icdpictypes.inc"	;takes care of: #include "p16fxxxA.inc",  max_flash, IdTypePIC
-	#include "../spbrgselect.inc"
-	#include "../bankswitch.inc"
-	#define first_address max_flash-100 ; 100 word in size
+__CONFIG  _HS_OSC & _CP_OFF & _WDT_OFF & _BODEN_ON & _PWRTE_ON & _LVP_OFF & _DEBUG_OFF
 
-	__CONFIG  _HS_OSC & _CP_OFF & _WDT_OFF & _BODEN_ON & _PWRTE_ON & _LVP_OFF & _DEBUG_OFF
+errorlevel 1, -305					; Desactiva la alerta que indica que F es el destino predeterminado
 
-	errorlevel 1, -305			; suppress warning msg that takes f as default
+cblock 0x20
+buffer:80
+endc
 
-	
-	cblock 0x20
-	buffer:80
-	endc
-	
-	cblock 0x78
-	crc
-	contor
-	i
-	cnt1
-	cnt2
-	cnt3
-	flag	
-	endc
-	
+cblock 0x78
+crc
+contor
+i
+cnt1
+cnt2
+cnt3
+flag	
+endc
 
-SendL macro car
-	movlw	car
-	movwf	TXREG
-	endm
+SendL		macro 		car
+movlw		car
+movwf		TXREG
+endm
 
 ;0000000000000000000000000 RESET 00000000000000000000000000
 
-		ORG     0x0000
-		PAGESEL IntrareBootloader
-		GOTO    IntrareBootloader
-
-;view with TabSize=4
-;&&&&&&&&&&&&&&&&&&&&&&&   START     &&&&&&&&&&&&&&&&&
-;----------------------  Bootloader  ----------------------
-;               
-;PC_flash:    C1h          AddrH  AddrL  nr  ...(DataLo DataHi)...  crc
-;PIC_response:   id   K                                                 K
-
+ORG    		0x0000
+PAGESEL		IntrareBootloader
+GOTO    	IntrareBootloader
 	
-	ORG first_address
-	nop
-	nop
-	nop
-	nop
-	org first_address+4
+ORG 		first_address
+nop
+nop
+nop
+nop
+org 		first_address+4
 
 IntrareBootloader
 			;init serial port
-	clrf	STATUS
-	bsf		STATUS,RP0			;BANK1_
-	movlw	b'00100100'
-	movwf	TXSTA
-	movlw	spbrg_value
-	movwf	SPBRG
-	BANK0_
-	movlw	b'10010000'						
-	movwf	RCSTA
-			;wait for computer
-	call	Receive	
+clrf	STATUS
+bsf		STATUS,RP0			;BANK1_
+movlw	b'00100100'
+movwf	TXSTA
+movlw	spbrg_value
+movwf	SPBRG
+BANK0_
+movlw	b'10010000'						
+movwf	RCSTA
+		;wait for computer
+call	Receive	
 			
-	sublw	0xC1				;Expect C1; 		w=c1-w
-	skpz					;if 0
-	goto	way_to_exit			; fin del programa
+sublw	0xC1				;Expect C1; 		w=c1-w
+skpz					;if 0
+goto	way_to_exit			; fin del programa
 						;si el resultado anterior no es cero
 
-	SendL IdTypePIC				;PIC type
-	;SendL IdSoftVer			;firmware ver x
+SendL IdTypePIC				;PIC type
+;SendL IdSoftVer			;firmware ver x
 
 MainLoop
 	clrf	STATUS				;bank0
