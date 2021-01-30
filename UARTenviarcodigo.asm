@@ -1,3 +1,5 @@
+;archivo que env√≠a datos por UART
+
 list	    p=16F877a
 include	    "P16F877a.INC"
  
@@ -18,7 +20,7 @@ movwf	    TRISB	;make all PORTB pins output except RB2
 movlw	    D'25'	;w=25
 movwf	    SPBRG	;SPBRG=25D, para osc=4000000
 movlw	    B'00100100'
-movwf	    TXSTA	;Com asÌncrona de 8 bits, alta velocidad, activada
+movwf	    TXSTA	;Com as√≠ncrona de 8 bits, alta velocidad, activada
 bcf	    STATUS,RP0  ;Banco cero
 movlw	    B'10000000'
 movwf	    RCSTA	;Activa los pines de puerto serial
@@ -27,7 +29,7 @@ movwf	    char	;Char=w
     
 main	    
 btfss	    PORTB,2	;Si RB2 es 1
-goto	    main	;Si no est· presionado
+goto	    main	;Si no est√° presionado
 movf	    char,W	;W=char
 movwf	    TXREG	;TXREG=char
 goto	    wthere
