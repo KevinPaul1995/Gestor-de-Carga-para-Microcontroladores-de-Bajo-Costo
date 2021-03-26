@@ -1,0 +1,4 @@
+Test1: Blink de RB0, RB1 y RB2 del Pic16f877a programado en Assembly.
+Test2: contador binario de 0 a 7 en el puero B del Pic16f877a programado en Assembly.
+Test3: Blink alternado en RBo y RB1 del Pic16f877a programado en C.
+Test4: Replica lo recibido por UART en el puerto B. La comunicación se hace a 9600 bauds con cristal de 4MHz en el Pic16f877a programado en Assembly.
